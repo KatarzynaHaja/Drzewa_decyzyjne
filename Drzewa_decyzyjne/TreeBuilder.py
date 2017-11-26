@@ -1,6 +1,7 @@
 from Drzewa_decyzyjne.decision_tree import Decision_Tree
 from Drzewa_decyzyjne.node import Node
 import copy
+from Drzewa_decyzyjne.Pruner import Pruner
 
 class TreeBuilder:
 
@@ -11,28 +12,72 @@ class TreeBuilder:
 
     def build_tree(self):
         node=Node()
-        self.tree=node
         self.build_tree_recursive(self.decistion_tree.train_data,node)
+        return node
 
     def build_tree_recursive(self,P,node):
+
         by_classes=self.decistion_tree.divide_by_classes(P)
-        if len(by_classes.keys())==1:
-            attr=next(iter(by_classes.keys()))
-            node.atribute=attr
+        if len(by_classes.keys())==1:   #leaf
+            node.attribute = next(iter(by_classes.keys()))
+            node.local_P = P
             return
 
         index=self.decistion_tree.find_the_best_atribiute(P)
-        node.atribiute=index
-
+        node.attribute=index
         by_attr=self.decistion_tree.divide_by_attributes(P,index)
-        size=len(by_attr.keys())
-
         for k in by_attr.keys():
+            # print(count,":",index,": ",k)
             new_node=Node(condition=k,parent = node)
             node.children.append(new_node)
             self.build_tree_recursive(by_attr[k],new_node)
 
-t = TreeBuilder("car.data")
-t.build_tree()
 
-print(t.tree.children[0].condition)
+    def traverse_tree(self,example,tree):
+        copy_tree=copy.deepcopy(tree)
+        while len(copy_tree.children) !=0:
+            flag=0
+            for j in copy_tree.children:
+                # print(example[j.parent.attribute],":",j.condition)
+                if example[j.parent.attribute] == j.condition:
+                    flag=1
+                    copy_tree = j
+            if flag==0:
+                break
+        class_of_element = copy_tree.attribute
+        if class_of_element == example[-1]:
+            return 1
+        else:
+            return 0
+
+    def traverse_all(self,tree,dataset):
+        points =0
+        for i in dataset:
+            points +=self.traverse_tree(i,tree)
+        print(points/len(dataset))
+        return points/len(dataset)
+
+    def print_recursive(self,tree):
+        if len(tree.children)==0:
+            print(tree.children)
+            return
+        print(tree.attribute)
+        for x in tree.children:
+            self.print_recursive(x)
+
+
+t = TreeBuilder("car.data")
+tree=t.build_tree()
+
+# print(tree.attribute)
+# for x in tree.children:
+#     print(x.attribute)
+#print(t.traverse_tree(t.decistion_tree.test_data[0],tree))
+p=Pruner(t,tree)
+print("^initial_accuracy")
+p.prune(tree)
+print("^pruner")
+tree=p.best_tree
+t.traverse_all(tree,t.decistion_tree.wal_data)
+print("^traverse")
+print("alo")

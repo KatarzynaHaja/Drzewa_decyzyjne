@@ -11,7 +11,6 @@ class Decision_Tree:
 
     def import_dataset(self):
         df = pd.read_csv(self.file, header=0)
-        self.atribiuties = list(df.columns.values)
         self.data = df.values
         y = self.data[:, -1]
         self.classes = set(y)
@@ -20,8 +19,8 @@ class Decision_Tree:
         random.shuffle(self.data)
         self.train_data = self.data[:int(self.data.shape[0] / (tr + wal + test) * tr)]
         self.wal_data = self.data[
-                        int(self.data.shape[0] / (tr + wal + test) * tr) + 1:int(self.data.shape[0] / (tr + wal + test))]
-        self.test_data = self.data[len(self.train_data) + len(self.wal_data):]
+                        len(self.train_data) + 1:int(len(self.train_data) + self.data.shape[0] / (tr + wal + test))]
+        self.test_data = self.data[len(self.train_data) + len(self.wal_data)+1:]
 
     def count_information(self,P):
         information = 0
@@ -33,7 +32,7 @@ class Decision_Tree:
     def conditional_entropy(self,P,t):
         entropy =0
         value = self.divide_by_attributes(P,t)
-        for i in value:
+        for i in value.keys():
             entropy+= len(value[i])/len(P) * self.count_information(value[i])
         return entropy
 
@@ -45,7 +44,6 @@ class Decision_Tree:
         for i in range(P.shape[1]-1):
             gain_list.append(self.gain(P,i))
 
-        print(max(gain_list))
         return gain_list.index(max(gain_list))
 
 
@@ -59,13 +57,6 @@ class Decision_Tree:
             classes[k]=np.array(classes[k])
 
         return classes
-        # classes_list = list()
-        # for k, v in classes.items():
-        #     classes_list.append(np.array(v))
-
-
-
-
 
     def divide_by_attributes(self, P, t):
         attr_set = set()
@@ -104,16 +95,16 @@ class Decision_Tree:
 
 
 #
-# d = Decision_Tree("car.data")
-# d.import_dataset()
-# d.divide_set()
+#d = Decision_Tree("car.data")
+#d.import_dataset()
+#d.divide_set()
 # print(len(d.train_data))
-# # d.divide_by_classes(d.train_data)
+#print(d.divide_by_classes(d.train_data))
 # #print(d.divide_by_attributes(d.train_data, 1)['high'][:,2])
 # #print(d.divide_by_attributes_all(d.train_data))
 # #print(d.get_by_attr_val(d.train_data,1,'high'))
 # #print(d.get_by_attr_val_and_class(d.train_data,1,'high'))
-# print(d.count_information(d.train_data))
-# print(d.conditional_entropy(d.train_data,1))
+#print(d.count_information(d.train_data))
+#print(d.conditional_entropy(d.train_data,1))
 # print(d.gain(d.train_data,1))
-# print(d.find_the_best_atribiute(d.train_data))
+#print(d.find_the_best_atribiute(d.train_data))

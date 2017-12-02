@@ -11,7 +11,7 @@ class TreeBuilder:
         self.decistion_tree.divide_set()
 
     def build_tree(self):
-        node=Node(root = None)
+        node=Node()
         self.build_tree_recursive(self.decistion_tree.train_data,node)
         return node
 
@@ -28,7 +28,7 @@ class TreeBuilder:
         by_attr=self.decistion_tree.divide_by_attributes(P,index)
         for k in by_attr.keys():
             # print(count,":",index,": ",k)
-            new_node=Node(condition=k,parent = node,local_P=by_attr[k], root=node.root)
+            new_node=Node(condition=k,parent = node,local_P=by_attr[k])
             node.children.append(new_node)
             self.build_tree_recursive(by_attr[k],new_node)
 

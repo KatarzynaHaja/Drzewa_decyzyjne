@@ -11,7 +11,7 @@ class TreeBuilder:
         self.decistion_tree.divide_set()
 
     def build_tree(self):
-        node=Node()
+        node=Node(root = None)
         self.build_tree_recursive(self.decistion_tree.train_data,node)
         return node
 
@@ -28,7 +28,7 @@ class TreeBuilder:
         by_attr=self.decistion_tree.divide_by_attributes(P,index)
         for k in by_attr.keys():
             # print(count,":",index,": ",k)
-            new_node=Node(condition=k,parent = node)
+            new_node=Node(condition=k,parent = node,local_P=by_attr[k], root=node.root)
             node.children.append(new_node)
             self.build_tree_recursive(by_attr[k],new_node)
 
@@ -43,7 +43,7 @@ class TreeBuilder:
                     flag=1
                     copy_tree = j
             if flag==0:
-                break
+                return 0
         class_of_element = copy_tree.attribute
         if class_of_element == example[-1]:
             return 1
@@ -54,7 +54,7 @@ class TreeBuilder:
         points =0
         for i in dataset:
             points +=self.traverse_tree(i,tree)
-        print(points/len(dataset))
+        print("accuracy",points/len(dataset))
         return points/len(dataset)
 
     def print_recursive(self,tree):
@@ -66,18 +66,26 @@ class TreeBuilder:
             self.print_recursive(x)
 
 
-t = TreeBuilder("car.data")
-tree=t.build_tree()
 
-# print(tree.attribute)
-# for x in tree.children:
-#     print(x.attribute)
-#print(t.traverse_tree(t.decistion_tree.test_data[0],tree))
-p=Pruner(t,tree)
+t = TreeBuilder("car.data")
+tree = t.build_tree()
 print("^initial_accuracy")
+t.traverse_all(tree,t.decistion_tree.test_data)
+p=Pruner(t,tree)
 p.prune(tree)
-print("^pruner")
 tree=p.best_tree
-t.traverse_all(tree,t.decistion_tree.wal_data)
-print("^traverse")
+print("^po pruningu dla testowego")
+t.traverse_all(tree,t.decistion_tree.test_data)
+
 print("alo")
+#
+# z = TreeBuilder("lenses.data")
+# tree = z.build_tree()
+# print("^initial_accuracy")
+# p=Pruner(z,tree)
+# p.prune(tree)
+# tree=p.best_tree
+# print("^po pruningu dla testowego")
+# z.traverse_all(tree,z.decistion_tree.wal_data)
+#
+# print("alo")

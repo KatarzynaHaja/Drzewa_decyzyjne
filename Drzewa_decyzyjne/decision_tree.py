@@ -27,10 +27,6 @@ class Decision_Tree:
     def count_information(self,P):
         information = 0
         values = self.divide_by_classes(P)
-        # classes = list()
-        # set_P = set([x[-1] for x in P])
-        # for value in set_P:
-        #     classes.append([x for x in P if x[-1] == value])
         for i in values.keys():
             information += len(values[i]) / len(P) * np.log2(len(values[i]) / len(P))
         return - information
@@ -40,7 +36,6 @@ class Decision_Tree:
         value = self.divide_by_attributes(P,t)
         for i in value.keys():
             entropy+= len(value[i])/len(P) * self.count_information(value[i])
-        #print("entropy",entropy)
         return entropy
 
     def gain(self,P,t):
@@ -55,10 +50,7 @@ class Decision_Tree:
 
 
     def divide_by_classes(self, P):
-        # set_P= set([x[-1] for x in P])
         classes = collections.defaultdict(list)
-        # for value in set_P:
-        #     print(len([x for x in P if x[-1] == value]))
         for j in P:
             classes[j[-1]].append(j)
 

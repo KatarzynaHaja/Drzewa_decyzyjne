@@ -34,11 +34,11 @@ class TreeBuilder:
 
 
     def traverse_tree(self,example,tree):
-        copy_tree=copy.deepcopy(tree)
+        #copy_tree = copy.deepcopy(tree)
+        copy_tree = tree
         while len(copy_tree.children) !=0:
             flag=0
             for j in copy_tree.children:
-                # print(example[j.parent.attribute],":",j.condition)
                 if example[j.parent.attribute] == j.condition:
                     flag=1
                     copy_tree = j
@@ -52,9 +52,10 @@ class TreeBuilder:
 
     def traverse_all(self,tree,dataset):
         points =0
+        copy_tree = copy.deepcopy(tree)
         for i in dataset:
-            points +=self.traverse_tree(i,tree)
-        print("accuracy",points/len(dataset))
+            copy_tree = copy.copy(tree)
+            points +=self.traverse_tree(i,copy_tree)
         return points/len(dataset)
 
     def print_recursive(self,tree):
@@ -65,27 +66,46 @@ class TreeBuilder:
         for x in tree.children:
             self.print_recursive(x)
 
+    def clone (self,node):
+        return node
 
 
+print("testy dla zbioru cars")
 t = TreeBuilder("car.data")
 tree = t.build_tree()
-print("^initial_accuracy")
-t.traverse_all(tree,t.decistion_tree.test_data)
-p=Pruner(t,tree)
-p.prune(tree)
+print("^accuracy dla walidacyjnego")
+print(t.traverse_all(tree,t.decistion_tree.wal_data))
+print("^accuracy dla testowego na początku")
+print(t.traverse_all(tree,t.decistion_tree.test_data))
+p_tree = copy.deepcopy(tree)
+p=Pruner(t,p_tree)
+p.prune(p_tree)
 tree=p.best_tree
 print("^po pruningu dla testowego")
-t.traverse_all(tree,t.decistion_tree.test_data)
-
-print("alo")
+print(t.traverse_all(tree,t.decistion_tree.test_data))
+#
+# print("alo")
 #
 # z = TreeBuilder("lenses.data")
 # tree = z.build_tree()
 # print("^initial_accuracy")
+# print(z.traverse_all(tree,z.decistion_tree.test_data))
 # p=Pruner(z,tree)
-# p.prune(tree)
-# tree=p.best_tree
-# print("^po pruningu dla testowego")
-# z.traverse_all(tree,z.decistion_tree.wal_data)
-#
-# print("alo")
+
+print("testy dla zbioru balance")
+z = TreeBuilder("balance1.data")
+tree = z.build_tree()
+init_tree = copy.deepcopy(tree)
+train_tree = copy.deepcopy(tree)
+print("^accuarcy dla treningowego")
+print(z.traverse_all(train_tree,z.decistion_tree.train_data))
+print("^accuracy na początku dla testowego")
+print(z.traverse_all(init_tree,z.decistion_tree.test_data))
+p_tree = copy.deepcopy(tree)
+p=Pruner(z,p_tree)
+p.prune(p_tree)
+tree=p.best_tree
+print("^po pruningu dla testowego")
+print(z.traverse_all(tree,z.decistion_tree.test_data))
+
+print("alo")

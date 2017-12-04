@@ -29,7 +29,8 @@ class Pruner:
             node.children=list()
             node.attribute=max(classes, key = lambda i : len(classes[i]))
             root=self.find_root(node)
-            accuracy=self.tree_builder.traverse_all(root,self.tree_builder.decistion_tree.wal_data)
+            p_root = copy.deepcopy(root)
+            accuracy=self.tree_builder.traverse_all(p_root,self.tree_builder.decistion_tree.wal_data)
             print(accuracy," : ",self.best_accuracy)
             if accuracy>self.best_accuracy-0.00000000000000001:
                 print("^better")
@@ -43,16 +44,16 @@ class Pruner:
                     node=child
                     self.prune(node)
 
-    #
-    # def select_best_class(self,classes):
-    #
-    #     best_class=None;
-    #     best_val=-1;
-    #     for c in classes.keys():
-    #         if len(classes[c])>best_val:
-    #             best_class=c
-    #
-    #     return best_class
+
+    def select_best_class(self,classes):
+
+        best_class=None;
+        best_val=-1;
+        for c in classes.keys():
+            if len(classes[c])>best_val:
+                best_class=c
+
+        return best_class
 
     def find_root(self,node):
         while node.parent!=None:

@@ -3,15 +3,16 @@ import collections
 from sklearn.datasets import load_iris
 import pandas as pd
 
-data = load_iris()
-y = data.target
-X = data.data
-da = np.insert(X,X.shape[1],y,axis=1)
-da = np.random.permutation(da)
-X = da[:100,:-1]
-y = da[:100,-1]
-X_predict = da[101:,:-1]
-y_real = da[101:,-1]
+# data = load_iris()
+# y = data.target
+# X = data.data
+# da = np.insert(X,X.shape[1],y,axis=1)
+# da = np.random.permutation(da)
+# X = da[:2*int(da.shape[0]/3),:-1]
+# y = da[:2*int(da.shape[0]/3),-1]
+# X_predict = da[2*int(da.shape[0]/3)+1:,:-1]
+# y_real = da[2*int(da.shape[0]/3)+1:,-1]
+
 class Node:
 
     def __init__(self, attribute=None, condition=None, parent=None, local_P = None, value=None, name = None):
@@ -30,7 +31,7 @@ class Node:
 
 class DecisionTree:
 
-    def __init__(self, X, y,categorical =False, max_depth=None, min_size=2, train = 1, wal =1, names=None):
+    def __init__(self, X, y,categorical =False, max_depth=20, min_size=2, train = 1, wal =1, names=None):
         self.max_depth = max_depth
         self.min_size = min_size
         self.X = X
@@ -152,6 +153,7 @@ class DecisionTree:
                 new_node = Node(condition=k, parent=node, local_P=by_attr[k])
                 node.children.append(new_node)
                 self.build_tree_recursive(by_attr[k], new_node, max_depth, i,min_sample)
+
         else:
             attr , value, treshold = self.find_the_best_atribiute(P)
             node.attribute = attr
@@ -160,7 +162,6 @@ class DecisionTree:
             data = np.array(sorted(P, key=lambda x: x[attr])).reshape(P.shape[0],P.shape[1])
             if treshold == 0:
                 treshold =1
-            #by_attr = self.divide_by_attributes(P, index)  # tutaj zrobić tak żeby dzieliło na podzial
             new_node_no = Node(condition = "no",parent=node, local_P=np.array(data[:treshold]))
             new_node_yes =  Node(condition = "yes",parent=node, local_P=np.array(data[treshold+1:]))
             node.children.append(new_node_no)
@@ -170,7 +171,7 @@ class DecisionTree:
 
     def build_tree(self):
         node = Node()
-        self.build_tree_recursive(np.array(self.training), node, self.max_depth,0, self.min_size)
+        self.build_tree_recursive(np.array(self.training), node, self.max_depth,-1, self.min_size)
         self.tree = node
 
     def traverse_tree(self,example):
@@ -219,32 +220,36 @@ class DecisionTree:
         if self.categorical == False:
             self.print_recursive(self.tree)
         else:
-            self.print_level_order(self.tree)
+            self.print_level(self.tree)
 
-    def print_level_order(self,root):
-        if root is None:
-            return
-        queue = []
 
-        queue.append(root)
-        parent = root
-        while (len(queue) > 0):
-            node = queue.pop(0)
-            if node.parent != None and parent.name != None:
-                if parent != node.parent:
+    def print_level(self,node):
+        """ Breadth-first traversal, print out the data by level """
+        level = 0
+        lastPrintedLevel = 0
+        visit = []
+        visit.append((node, level))
+        parent = node
+        while len(visit) != 0:
+            item = visit.pop(0)
+            if item[1] != lastPrintedLevel:  # New line for a new level
+                lastPrintedLevel += 1
+                print()
+                print("Poziom : ",str(item[1]))
+                print()
+            if item[0].parent != None and parent.name != None:
+                if parent != item[0].parent:
                     print("WEZEL***************************************")
-                if parent.name != node.parent.name:
-                    print("NOWY POZIOM---------------------------------------")
-            if node.parent != None:
-                print("warunek", node.condition, "atrybut ", node.name, "rodzic", node.parent.name, )
+            if item[0].parent != None:
+                print("atrybut: ", item[0].name, "warunek: ",item[0].condition, "rodzic: ", item[0].parent.name)
             else:
-                print("atrybut ", node.name)
-            for i in node.children:
-                if i is not None:
-                    queue.append(i)
-            if node.parent != None:
-                parent = node.parent
+                print("atrybut: ", item[0].name)
 
+            for i in item[0].children:
+                if i!= None:
+                    visit.append((i, item[1] + 1))
+            if item[0].parent != None:
+                parent = item[0].parent
 
     def print_recursive(self, tree):
         if len(tree.children) == 0:
@@ -258,29 +263,28 @@ class DecisionTree:
             self.print_recursive(x)
 
 
-print(X_predict)
-blee = np.insert(X_predict,X_predict.shape[1],y_real,axis=1)
-print(blee)
-d = DecisionTree(X,y,100)
-print("accuracy",d.count_accuracy(blee[:100]))
-d.__str__()
-
-# df = pd.read_csv("car.data")
-# data = np.array(df.values)
-# names = np.array(pd.read_csv("car.data", nrows=1).columns)
-# y = data[:, -1]
-# X = data[:,:-1]
-# da = np.insert(X,X.shape[1],y,axis=1)
-# da = np.random.permutation(da)
-# X = da[:2*int(da.shape[0]/3),:-1]
-# y = da[:2*int(da.shape[0]/3),-1]
 #
-# X_predict = da[2*int(da.shape[0]/3)+1:,:-1]
-# y_real = da[2*int(da.shape[0]/3)+1:,-1]
 # blee = np.insert(X_predict,X_predict.shape[1],y_real,axis=1)
-# d = DecisionTree(X,y,True,100, names = names)
-# print("accuracy",d.count_accuracy(blee))
-# # print(d.tree.attribute,"> ", d.tree.value)
+# d = DecisionTree(X,y,categorical=False)
+# print("accuracy",d.count_accuracy(blee[:100]))
 # d.__str__()
+
+df = pd.read_csv("car.data")
+data = np.array(df.values)
+names = np.array(pd.read_csv("car.data", nrows=1).columns)
+y = data[:, -1]
+X = data[:,:-1]
+da = np.insert(X,X.shape[1],y,axis=1)
+da = np.random.permutation(da)
+X = da[:2*int(da.shape[0]/3),:-1]
+y = da[:2*int(da.shape[0]/3),-1]
+
+X_predict = da[2*int(da.shape[0]/3)+1:,:-1]
+y_real = da[2*int(da.shape[0]/3)+1:,-1]
+blee = np.insert(X_predict,X_predict.shape[1],y_real,axis=1)
+d = DecisionTree(X,y,True,max_depth=5, names = names)
+print("accuracy",d.count_accuracy(blee))
+# print(d.tree.attribute,"> ", d.tree.value)
+d.__str__()
 
 

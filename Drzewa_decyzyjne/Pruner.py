@@ -31,10 +31,10 @@ class Pruner:
             root=self.find_root(node)
             p_root = copy.deepcopy(root)
             accuracy=self.tree_builder.traverse_all(p_root,self.tree_builder.decistion_tree.wal_data)
-            print(accuracy," : ",self.best_accuracy)
-            if accuracy>self.best_accuracy-0.00000000000000001:
+            #print(accuracy," : ",self.best_accuracy)
+            if accuracy>self.best_accuracy-0.0001:
                 print("^better")
-                self.best_accuracy=accuracy
+                #self.best_accuracy=accuracy
                 self.best_tree=root
                 self.prune(self.best_tree)
 

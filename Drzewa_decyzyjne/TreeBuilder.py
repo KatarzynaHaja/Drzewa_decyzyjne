@@ -12,25 +12,28 @@ class TreeBuilder:
 
     def build_tree(self):
         node=Node()
-        self.build_tree_recursive(self.decistion_tree.train_data,node)
+        self.build_tree_recursive(self.decistion_tree.train_data,node,5,0)
         return node
 
-    def build_tree_recursive(self,P,node):
+    def build_tree_recursive(self,P,node,max_depth,i):
 
         by_classes=self.decistion_tree.divide_by_classes(P)
-        if len(by_classes.keys())==1:   #leaf
+        i+=1
+        print(i)
+        if len(by_classes.keys())==1 or i == max_depth:   #leaf
             node.attribute = next(iter(by_classes.keys()))
             node.local_P = P
             return
 
         index=self.decistion_tree.find_the_best_atribiute(P)
         node.attribute=index
-        by_attr=self.decistion_tree.divide_by_attributes(P,index)
+        node.local_P = P
+        by_attr=self.decistion_tree.divide_by_attributes(P,index) # tutaj zrobić tak żeby dzieliło na podzial
         for k in by_attr.keys():
             # print(count,":",index,": ",k)
             new_node=Node(condition=k,parent = node,local_P=by_attr[k])
             node.children.append(new_node)
-            self.build_tree_recursive(by_attr[k],new_node)
+            self.build_tree_recursive(by_attr[k],new_node, max_depth,i)
 
 
     def traverse_tree(self,example,tree):

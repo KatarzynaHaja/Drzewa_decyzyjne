@@ -12,7 +12,6 @@ class Decision_Tree:
     def import_dataset(self):
         df = pd.read_csv(self.file, header=0)
         self.data = np.array(df.values)
-
         y = self.data[:, -1]
         self.classes = set(y)
 
@@ -58,8 +57,16 @@ class Decision_Tree:
             classes[k]=np.array(classes[k])
 
         return classes
-
+    def find_the_best_subset(self,P):
+        #tutaj napisać najlepszy podział zwrócić index ? albo najlepiej już podzielony subset
+        #to już mam posportowane
+        #for i in P:
+        # zrob licznosci klas tablicy podzielonych w proporcach i, n-i
+        #policz gain dla nich - tytlko własnie ttaj by się przydał gain przyjmujacy 2 argumenty albo jakis plaski jednowymarowy i index by
+        #powiedzial jak podzielic caly dataset
+        pass
     def divide_by_attributes(self, P, t):
+        #to trzeba napisać tak żeby robiło podział na dwie klasy ( nie klasy tylko podziały typu >75itp) według atrybutu
         attr_set = set()
         for i in P:
             attr_set.add(i[t])

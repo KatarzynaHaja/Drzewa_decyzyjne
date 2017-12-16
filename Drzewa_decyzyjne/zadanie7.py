@@ -2,20 +2,20 @@ import numpy as np
 import collections
 from sklearn.datasets import load_iris
 import pandas as pd
-
-# data = load_iris()
-# y = data.target
-# X = data.data
-# da = np.insert(X,X.shape[1],y,axis=1)
-# da = np.random.permutation(da)
-# X = da[:2*int(da.shape[0]/3),:-1]
-# y = da[:2*int(da.shape[0]/3),-1]
-# X_predict = da[2*int(da.shape[0]/3)+1:,:-1]
-# y_real = da[2*int(da.shape[0]/3)+1:,-1]
+import pptree
+data = load_iris()
+y = data.target
+X = data.data
+da = np.insert(X,X.shape[1],y,axis=1)
+da = np.random.permutation(da)
+X = da[:2*int(da.shape[0]/3),:-1]
+y = da[:2*int(da.shape[0]/3),-1]
+X_predict = da[2*int(da.shape[0]/3)+1:,:-1]
+y_real = da[2*int(da.shape[0]/3)+1:,-1]
 
 class Node:
 
-    def __init__(self, attribute=None, condition=None, parent=None, local_P = None, value=None, name = None):
+    def __init__(self, attribute=None, parent=None, condition=None,local_P = None, value=None, name = None):
         self.local_P = local_P
         self.attribute = attribute
         self.condition = condition
@@ -24,11 +24,13 @@ class Node:
         self.name = name
         self.children = list()
 
-    def preorder(self):
-        yield self.attribute
-        for child in self.children:
-            yield from child.preorder()
+    # def preorder(self):
+    #     yield self.attribute
+    #     for child in self.children:
+    #         yield from child.preorder()
 
+    def __str__(self):
+            return self.attribute
 class DecisionTree:
 
     def __init__(self, X, y,categorical =False, max_depth=20, min_size=2, train = 1, wal =1, names=None):
@@ -138,11 +140,13 @@ class DecisionTree:
     def build_tree_recursive(self, P, node, max_depth, i, min_sample):
         by_classes = self.divide_by_classes(P)
         i += 1
-        if len(by_classes.keys()) == 1 or i == max_depth or P.shape[0]  <= min_sample :  # leaf
+
+        if len(by_classes.keys()) == 1 or i == max_depth or P.shape[0]  <= min_sample :
             node.attribute = next(iter(by_classes.keys()))
             node.name = next(iter(by_classes.keys()))
             node.local_P = P
             return
+
         if self.categorical == True:
             index = self.find_the_best_atribiute_categorical(P)
             node.attribute = index
@@ -193,7 +197,7 @@ class DecisionTree:
                     flag=1
                     copy_tree = j
             if flag==0:
-                return 0
+                return "unacc"
         return copy_tree.attribute
 
 
@@ -217,14 +221,16 @@ class DecisionTree:
         return points/len(predicted_class)
 
     def __str__(self):
-        if self.categorical == False:
-            self.print_recursive(self.tree)
-        else:
-            self.print_level(self.tree)
+        # if self.categorical == False:
+        #     self.print_recursive(self.tree)
+        # else:
+        #     self.print_level(self.tree)
+        pptree.print_tree(d.tree)
+
+
 
 
     def print_level(self,node):
-        """ Breadth-first traversal, print out the data by level """
         level = 0
         lastPrintedLevel = 0
         visit = []
@@ -282,9 +288,10 @@ y = da[:2*int(da.shape[0]/3),-1]
 X_predict = da[2*int(da.shape[0]/3)+1:,:-1]
 y_real = da[2*int(da.shape[0]/3)+1:,-1]
 blee = np.insert(X_predict,X_predict.shape[1],y_real,axis=1)
-d = DecisionTree(X,y,True,max_depth=5, names = names)
+d = DecisionTree(X,y,True, names = names)
 print("accuracy",d.count_accuracy(blee))
 # print(d.tree.attribute,"> ", d.tree.value)
 d.__str__()
+
 
 
